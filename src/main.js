@@ -4,13 +4,15 @@ import {
     Text,
     TextInput,
     View,
-    TouchableOpacity
+    TouchableOpacity,
+    ScrollView
 } from 'react-native';
 
 module.exports = React.createClass({
     getInitialState() {
         return ({
             tasks: ['Take out the trash', 'Get groceries', 'Practice piano'],
+            completeTasks: [],
             task: ''
         })
     },
@@ -37,15 +39,50 @@ module.exports = React.createClass({
     },
 
     completeTask(index) {
-        console.log('complete a task: ', this.state.tasks[index]);
         let tasks = this.state.tasks;
         tasks = tasks.slice(0, index).concat(tasks.slice(index + 1));
-        this.setState({tasks});
+
+        let completeTasks = this.state.completeTasks;
+        completeTasks = completeTasks.concat([this.state.tasks[index]]);
+
+        this.setState({
+            tasks,
+            completeTasks
+        });
+
+        console.log('completeTasks: ', this.state.completeTasks);
     },
 
     addTask() {
         let tasks = this.state.tasks.concat([this.state.task]);
         this.setState({tasks});
+    },
+
+    renderCompleted(tasks) {
+        return (
+            tasks.map((task, index) => {
+                return (
+                    <View key={task} style={styles.task}>
+                        <Text style={styles.completed}>
+                            {task}
+                        </Text>
+                        <TouchableOpacity
+                            onPress={() => this.deleteTask(index)}
+                        >
+                            <Text>
+                                &#10005;
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )
+            })
+        )
+    },
+
+    deleteTask(index) {
+        let completeTasks = this.state.completeTasks;
+        completeTasks = completeTasks.slice(0, index).concat(completeTasks.slice(index + 1));
+        this.setState({completeTasks});
     },
     
     render() {
@@ -59,11 +96,13 @@ module.exports = React.createClass({
                         placeholder="Add a task..."
                         onChangeText={(text) => {
                             this.setState({task: text});
-                            console.log(this.state.task);
                         }}
                         onEndEditing={() => this.addTask()}
                     />
-                    {this.renderList(this.state.tasks)}
+                    <ScrollView>
+                        {this.renderList(this.state.tasks)}
+                        {this.renderCompleted(this.state.completeTasks)}
+                    </ScrollView>
                 </View>
         )
     }
@@ -80,11 +119,13 @@ const styles = StyleSheet.create({
         fontSize: 18
     },
     task: {
+        flexDirection: 'row',
         height: 60,
         borderBottomWidth: 1,
         borderColor: 'black',
-        justifyContent: 'center',
-        alignItems: 'center'
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 20
     },
     input: {
         height: 60,
@@ -93,5 +134,9 @@ const styles = StyleSheet.create({
         borderColor: 'black',
         textAlign: 'center',
         margin: 10
+    },
+    completed: {
+        color: '#555',
+        textDecorationLine: 'line-through'
     }
 })
