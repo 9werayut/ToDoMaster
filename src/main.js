@@ -29,6 +29,10 @@ module.exports = React.createClass({
             });
     },
 
+    componentDidUpdate() {
+        this.setStorage();
+    },
+
     setStorage() {
         AsyncStorage.setItem('tasks', JSON.stringify(this.state.tasks));
         AsyncStorage.setItem('completeTasks', JSON.stringify(this.state.completeTasks));
@@ -66,15 +70,11 @@ module.exports = React.createClass({
             tasks,
             completeTasks
         });
-
-        this.setStorage();
     },
 
     addTask() {
         let tasks = this.state.tasks.concat([this.state.task]);
         this.setState({tasks});
-
-        this.setStorage();
     },
 
     renderCompleted(tasks) {
@@ -102,8 +102,6 @@ module.exports = React.createClass({
         let completeTasks = this.state.completeTasks;
         completeTasks = completeTasks.slice(0, index).concat(completeTasks.slice(index + 1));
         this.setState({completeTasks});
-
-        this.setStorage();
     },
     
     render() {
