@@ -5,7 +5,8 @@ import {
     TextInput,
     View,
     TouchableOpacity,
-    ScrollView
+    ScrollView,
+    AsyncStorage
 } from 'react-native';
 
 module.exports = React.createClass({
@@ -16,12 +17,28 @@ module.exports = React.createClass({
             task: ''
         })
     },
+    
+    componentWillMount() {
+        AsyncStorage.getItem('tasks')
+            .then(response => {
+                this.setState({tasks: JSON.parse(response)});
+            });
+        AsyncStorage.getItem('completeTasks')
+            .then(response => {
+                this.setState({completeTasks: JSON.parse(response)})
+            });
+    },
+
+    setStorage() {
+        AsyncStorage.setItem('tasks', JSON.stringify(this.state.tasks));
+        AsyncStorage.setItem('completeTasks', JSON.stringify(this.state.completeTasks));
+    },
 
     renderList(tasks) {
         return (
             tasks.map((task, index) => {
                 return(
-                    <View key={task} style={styles.task}>
+                    <View key={index} style={styles.task}>
                         <Text>
                             {task}
                         </Text>
@@ -50,19 +67,21 @@ module.exports = React.createClass({
             completeTasks
         });
 
-        console.log('completeTasks: ', this.state.completeTasks);
+        this.setStorage();
     },
 
     addTask() {
         let tasks = this.state.tasks.concat([this.state.task]);
         this.setState({tasks});
+
+        this.setStorage();
     },
 
     renderCompleted(tasks) {
         return (
             tasks.map((task, index) => {
                 return (
-                    <View key={task} style={styles.task}>
+                    <View key={index} style={styles.task}>
                         <Text style={styles.completed}>
                             {task}
                         </Text>
@@ -83,9 +102,12 @@ module.exports = React.createClass({
         let completeTasks = this.state.completeTasks;
         completeTasks = completeTasks.slice(0, index).concat(completeTasks.slice(index + 1));
         this.setState({completeTasks});
+
+        this.setStorage();
     },
     
     render() {
+        //console.log(this.state);
         return (
                 <View style={styles.container}>
                     <Text style={styles.header}>
